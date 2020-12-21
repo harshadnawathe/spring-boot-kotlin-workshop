@@ -1,0 +1,22 @@
+
+- Val / Var
+To declare a variable with name use val / var
+
+val : Cannot be reassigned
+var : Can be reassigned
+
+Guideline: Always use val unless you want to reassign.
+
+- Mutable / Immutable objects
+MutableList / List
+
+- Nullable / Non-nullable Types
+Smart casts in (if x != null) blocks
+Elvis expressions ?: To provide a fallback upon null
+!! - To forcibly convert a T? into T
+
+- Functions
+declared with keyword `fun`
+expression bodies
+
+
