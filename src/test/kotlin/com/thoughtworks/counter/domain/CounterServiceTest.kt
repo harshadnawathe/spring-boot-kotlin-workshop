@@ -126,5 +126,14 @@ class CounterServiceTest {
 
         assertThat(counter).isNull()
     }
+
+    @Test
+    fun `should return a Counter by id`() {
+        val service = CounterService(repository)
+
+        val counter = service.find(id = "some-id")!!
+
+        assertThat(counter.id).isEqualTo("some-id")
+    }
 }
 

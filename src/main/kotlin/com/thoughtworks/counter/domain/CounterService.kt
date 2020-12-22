@@ -6,6 +6,11 @@ class CounterService(
 
     fun createNew(name: String) = counterRepository.save(Counter(name))
 
+    fun find(id: String) : Counter? {
+        return counterRepository.findById(id)
+            .orElse(null)
+    }
+
     fun increment(id: String): Counter? {
         return counterRepository.findById(id)
             .map {
