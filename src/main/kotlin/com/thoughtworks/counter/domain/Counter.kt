@@ -6,11 +6,10 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "counter")
-class Counter(val name: String) {
-
-    @Id
-    lateinit var id : String
-        private set
+class Counter(
+    @Indexed
+    val name: String
+) {
 
     @PersistenceConstructor
     constructor(name: String, count: Int, id: String) : this(name) {
@@ -18,8 +17,12 @@ class Counter(val name: String) {
         this.id = id
     }
 
+    @Id
+    lateinit var id: String
+        private set
+
     fun increment() {
-       count++
+        count++
     }
 
     fun decrement() {
