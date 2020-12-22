@@ -25,6 +25,7 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
+    testImplementation("io.mockk:mockk:1.10.0")
 }
 
 tasks.withType<Test> {
