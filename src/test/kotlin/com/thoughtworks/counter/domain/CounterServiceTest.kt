@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.apache.commons.lang3.RandomStringUtils.random
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -61,16 +62,16 @@ class CounterServiceTest {
     }
 
     @Test
-    fun `should return null when counter to increment is not present`() {
+    fun `should throw CounterNotFoundException when counter to increment is not present`() {
         every {
             repository.findById("non-existent-id")
         } returns Optional.empty()
 
         val service = CounterService(repository)
 
-        val counter: Counter? = service.increment(id = "non-existent-id")
-
-        assertThat(counter).isNull()
+        assertThatThrownBy {
+            service.increment(id = "non-existent-id")
+        }.isInstanceOf(CounterNotFoundException::class.java)
     }
 
     @Test
@@ -115,16 +116,16 @@ class CounterServiceTest {
     }
 
     @Test
-    fun `should return null when counter to decrement is not present`() {
+    fun `should throw CounterNotFoundException when counter to decrement is not present`() {
         every {
             repository.findById("non-existent-id")
         } returns Optional.empty()
 
         val service = CounterService(repository)
 
-        val counter: Counter? = service.decrement(id = "non-existent-id")
-
-        assertThat(counter).isNull()
+        assertThatThrownBy {
+            service.decrement(id = "non-existent-id")
+        }.isInstanceOf(CounterNotFoundException::class.java)
     }
 
     @Test
@@ -134,6 +135,19 @@ class CounterServiceTest {
         val counter = service.find(id = "some-id")!!
 
         assertThat(counter.id).isEqualTo("some-id")
+    }
+
+    @Test
+    fun `should throw CounterNotFoundException when counter is not present`() {
+        every {
+            repository.findById("non-existent-id")
+        } returns Optional.empty()
+
+        val service = CounterService(repository)
+
+        assertThatThrownBy {
+            service.find(id = "non-existent-id")
+        }.isInstanceOf(CounterNotFoundException::class.java)
     }
 }
 
