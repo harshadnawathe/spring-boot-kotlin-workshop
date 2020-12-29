@@ -46,19 +46,19 @@ class CounterTest {
 
     @Test
     fun `should throw exception on decrement when current count is 0`() {
-        val counter = Counter("my-counter")
+        val counter = Counter("my-counter", 0, "some-id")
 
         assertThatThrownBy {
             counter.decrement()
-        }.hasMessage("Can not decrement when count is 0")
+        }.hasMessage("Cannot decrement counter some-id as count is zero")
     }
 
     @Test
-    fun `should throw IllegalStateException on decrement when current count is 0`() {
-        val counter = Counter("my-counter")
+    fun `should throw CounterUnderflowError on decrement when current count is 0`() {
+        val counter = Counter("my-counter", 0, "some-id")
 
         assertThatThrownBy {
             counter.decrement()
-        }.isInstanceOf(IllegalStateException::class.java)
+        }.isInstanceOf(CounterUnderflowError::class.java)
     }
 }

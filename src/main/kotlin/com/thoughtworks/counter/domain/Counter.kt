@@ -26,9 +26,7 @@ class Counter(
     }
 
     fun decrement() {
-        check(count > 0) {
-            "Can not decrement when count is 0"
-        }
+       checkNotZero()
 
         count--
     }
@@ -54,5 +52,11 @@ class Counter(
     var count = 0
         private set
 
-
+    private fun checkNotZero() {
+        if (count == 0) {
+            throw CounterUnderflowError(id)
+        }
+    }
 }
+
+class CounterUnderflowError(id: String) : IllegalStateException("Cannot decrement counter $id as count is zero")
