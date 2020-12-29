@@ -1,20 +1,23 @@
 package com.thoughtworks.counter.http
 
 import com.thoughtworks.counter.domain.Counter
+import com.thoughtworks.counter.domain.CounterNotFoundException
 import com.thoughtworks.counter.domain.CounterService
 import io.mockk.every
 import io.mockk.mockk
 import org.apache.commons.lang3.RandomStringUtils.random
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class CounterControllerTest {
 
     private val counterService = mockk<CounterService>() {
-        every { createNew(any()) } answers { Counter(arg(0), 0, random(5)) }
-        every { find(any()) } answers { Counter("my-counter", 5, arg(0)) }
-        every { increment(any()) } answers { Counter("my-counter", 6, arg(0)) }
-        every { decrement(any()) } answers { Counter("my-counter", 4, arg(0)) }
+        every { createNew("my-counter") } answers { Counter("my-counter", 0, random(5)) }
+        every { find("my-counter") } answers { Counter("my-counter", 5, "my-counter") }
+        every { find("invalid-id") } throws CounterNotFoundException("invalid-id")
+        every { increment("my-counter") } answers { Counter("my-counter", 6, "my-counter") }
+        every { decrement("my-counter") } answers { Counter("my-counter", 4, "my-counter") }
     }
 
     @Test
@@ -66,5 +69,14 @@ class CounterControllerTest {
         val response: CounterResponse = controller.decrement(id = "my-counter")
 
         assertThat(response.count).isEqualTo(4)
+    }
+
+    @Test
+    fun `should throw CounterNotFoundException when id is invalid`() {
+        val controller = CounterController(counterService)
+
+        assertThrows<CounterNotFoundException> {
+            controller.find(id = "invalid-id")
+        }
     }
 }

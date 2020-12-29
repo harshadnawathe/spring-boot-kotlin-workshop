@@ -1,15 +1,14 @@
 package com.thoughtworks.counter.http
 
 import com.thoughtworks.counter.domain.Counter
+import com.thoughtworks.counter.domain.CounterNotFoundException
 import com.thoughtworks.counter.domain.CounterService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -34,6 +33,10 @@ class CounterControllerWebMvcTest {
 
         `when`(mockCounterService.find("some-counter-id")).thenReturn(
             Counter("my-counter", 0, "some-counter-id")
+        )
+
+        `when`(mockCounterService.find("invalid-id")).thenThrow(
+            CounterNotFoundException("invalid-id")
         )
 
         `when`(mockCounterService.increment("some-counter-id")).thenReturn(
@@ -91,6 +94,15 @@ class CounterControllerWebMvcTest {
                 content {
                     json("{\"name\": \"my-counter\", \"count\": 0}")
                 }
+            }
+    }
+
+
+    @Test
+    fun `should response with status 404 when Counter is not present`() {
+        mockMvc.get("/counter-service/counter/invalid-id")
+            .andExpect {
+                status { isNotFound }
             }
     }
 }
