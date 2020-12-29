@@ -35,6 +35,10 @@ class CounterControllerWebMvcTest {
         `when`(mockCounterService.find("some-counter-id")).thenReturn(
             Counter("my-counter", 0, "some-counter-id")
         )
+
+        `when`(mockCounterService.increment("some-counter-id")).thenReturn(
+            Counter("my-counter", 1, "some-counter-id")
+        )
     }
 
     @Test
@@ -60,6 +64,17 @@ class CounterControllerWebMvcTest {
                 status { is2xxSuccessful }
                 content {
                     json("{\"name\": \"my-counter\", \"count\": 0}")
+                }
+            }
+    }
+
+    @Test
+    fun `should handle request to increment a Counter by id`() {
+        mockMvc.post("/counter-service/counter/some-counter-id/increment")
+            .andExpect {
+                status { is2xxSuccessful }
+                content {
+                    json("{\"name\": \"my-counter\", \"count\": 1}")
                 }
             }
     }
