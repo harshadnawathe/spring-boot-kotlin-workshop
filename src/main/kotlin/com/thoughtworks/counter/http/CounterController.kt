@@ -3,6 +3,7 @@ package com.thoughtworks.counter.http
 import com.thoughtworks.counter.domain.Counter
 import com.thoughtworks.counter.domain.CounterNotFoundException
 import com.thoughtworks.counter.domain.CounterService
+import com.thoughtworks.counter.domain.CounterUnderflowError
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -74,6 +75,12 @@ class CounterController(
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleException(e: CounterNotFoundException): Any {
+        return mapOf("message" to e.message)
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    fun handleException(e: CounterUnderflowError): Any {
         return mapOf("message" to e.message)
     }
 }

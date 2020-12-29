@@ -3,6 +3,7 @@ package com.thoughtworks.counter.http
 import com.thoughtworks.counter.domain.Counter
 import com.thoughtworks.counter.domain.CounterNotFoundException
 import com.thoughtworks.counter.domain.CounterService
+import com.thoughtworks.counter.domain.CounterUnderflowError
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
@@ -45,6 +46,10 @@ class CounterControllerWebMvcTest {
 
         `when`(mockCounterService.decrement("some-counter-id")).thenReturn(
             Counter("my-counter", 0, "some-counter-id")
+        )
+
+        `when`(mockCounterService.decrement("zero-count")).thenThrow(
+            CounterUnderflowError("zero-count")
         )
     }
 
@@ -103,6 +108,20 @@ class CounterControllerWebMvcTest {
         mockMvc.get("/counter-service/counter/invalid-id")
             .andExpect {
                 status { isNotFound }
+                content {
+                    json("{\"message\": \"Counter with id invalid-id not found\"}")
+                }
+            }
+    }
+
+    @Test
+    fun `should response with status 404 when Counter cannot be decremented`() {
+        mockMvc.post("/counter-service/counter/zero-count/decrement")
+            .andExpect {
+                status { isConflict }
+                content {
+                    json("{\"message\": \"Cannot decrement counter zero-count as count is zero\"}")
+                }
             }
     }
 }
