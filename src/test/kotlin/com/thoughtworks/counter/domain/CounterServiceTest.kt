@@ -7,20 +7,21 @@ import org.apache.commons.lang3.RandomStringUtils.random
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.util.*
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 class CounterServiceTest {
 
     private val repository = mockk<CounterRepository> {
-        every { findById(any()) } answers { Optional.of(Counter("my-counter", 5, arg(0))) }
-        every { save(any<Counter>()) } answers { arg(0) }
+        every { findById(any<String>()) } answers { Mono.just(Counter("my-counter", 5, arg(0))) }
+        every { save(any<Counter>()) } answers { Mono.just(arg(0)) }
     }
 
     @Test
     fun `should return a new counter with given name`() {
         val service = CounterService(repository)
 
-        val counter = service.createNew(name = "my-counter")
+        val counter = service.createNew(name = "my-counter").block()!!
 
         assertThat(counter.name).isEqualTo("my-counter")
     }
@@ -29,7 +30,7 @@ class CounterServiceTest {
     fun `should save the new counter in the repository`() {
         val service = CounterService(repository)
 
-        service.createNew(name = "counter")
+        service.createNew(name = "counter").block()!!
 
         verify {
             repository.save(match<Counter> {
@@ -42,7 +43,7 @@ class CounterServiceTest {
     fun `should increment the counter with given id`() {
         val service = CounterService(repository)
 
-        val counter = service.increment(id = "some-id")!!
+        val counter = service.increment(id = "some-id").block()!!
 
         assertThat(counter.count).isEqualTo(6)
     }
@@ -51,7 +52,7 @@ class CounterServiceTest {
     fun `should save the incremented counter in the repository`() {
         val service = CounterService(repository)
 
-        service.increment(id = "some-id")
+        service.increment(id = "some-id").block()!!
 
         verify {
             repository.save(match<Counter> {
@@ -65,12 +66,12 @@ class CounterServiceTest {
     fun `should throw CounterNotFoundException when counter to increment is not present`() {
         every {
             repository.findById("non-existent-id")
-        } returns Optional.empty()
+        } returns Mono.empty()
 
         val service = CounterService(repository)
 
         assertThatThrownBy {
-            service.increment(id = "non-existent-id")
+            service.increment(id = "non-existent-id").block()
         }.isInstanceOf(CounterNotFoundException::class.java)
     }
 
@@ -82,12 +83,12 @@ class CounterServiceTest {
                 val arg: Counter = arg(0)
                 Counter(name = arg.name, count = arg.count, id = random(5)).also {
                     saved = it
-                }
+                }.toMono()
             }
         }
         val service = CounterService(fakeRepository)
 
-        val counter = service.createNew(name = "counter")
+        val counter = service.createNew(name = "counter").block()!!
 
         assertThat(saved).isEqualTo(counter)
     }
@@ -96,7 +97,7 @@ class CounterServiceTest {
     fun `should decrement the counter with given id`() {
         val service = CounterService(repository)
 
-        val counter = service.decrement(id = "some-id")!!
+        val counter = service.decrement(id = "some-id").block()!!
 
         assertThat(counter.count).isEqualTo(4)
     }
@@ -105,7 +106,7 @@ class CounterServiceTest {
     fun `should save the decremented counter in the repository`() {
         val service = CounterService(repository)
 
-        service.decrement(id = "some-id")
+        service.decrement(id = "some-id").block()!!
 
         verify {
             repository.save(match<Counter> {
@@ -119,12 +120,12 @@ class CounterServiceTest {
     fun `should throw CounterNotFoundException when counter to decrement is not present`() {
         every {
             repository.findById("non-existent-id")
-        } returns Optional.empty()
+        } returns Mono.empty()
 
         val service = CounterService(repository)
 
         assertThatThrownBy {
-            service.decrement(id = "non-existent-id")
+            service.decrement(id = "non-existent-id").block()
         }.isInstanceOf(CounterNotFoundException::class.java)
     }
 
@@ -132,7 +133,7 @@ class CounterServiceTest {
     fun `should return a Counter by id`() {
         val service = CounterService(repository)
 
-        val counter = service.find(id = "some-id")!!
+        val counter = service.find(id = "some-id").block()!!
 
         assertThat(counter.id).isEqualTo("some-id")
     }
@@ -141,12 +142,12 @@ class CounterServiceTest {
     fun `should throw CounterNotFoundException when counter is not present`() {
         every {
             repository.findById("non-existent-id")
-        } returns Optional.empty()
+        } returns Mono.empty()
 
         val service = CounterService(repository)
 
         assertThatThrownBy {
-            service.find(id = "non-existent-id")
+            service.find(id = "non-existent-id").block()
         }.isInstanceOf(CounterNotFoundException::class.java)
     }
 }

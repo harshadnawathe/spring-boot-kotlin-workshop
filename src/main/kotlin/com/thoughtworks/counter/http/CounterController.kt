@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Mono
 
 
 data class CreateCounterRequest(val name: String)
@@ -39,37 +40,43 @@ class CounterController(
     @PostMapping(
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
-    fun create(@RequestBody request: CreateCounterRequest): CounterResponse {
-        return CounterResponse(
-            counter = counterService.createNew(request.name)
-        )
+    fun create(@RequestBody request: CreateCounterRequest): Mono<CounterResponse> {
+        return counterService.createNew(request.name)
+            .map {
+                CounterResponse(it)
+            }
+
     }
 
     @GetMapping(
         path = ["/{counter-id}"]
     )
-    fun find(@PathVariable("counter-id") id: String): CounterResponse {
-        return CounterResponse(
-            counter = counterService.find(id)
-        )
+    fun find(@PathVariable("counter-id") id: String): Mono<CounterResponse> {
+        return counterService.find(id)
+            .map {
+                CounterResponse(it)
+            }
     }
 
     @PostMapping(
         path = ["/{counter-id}/increment"]
     )
-    fun increment(@PathVariable("counter-id") id: String): CounterResponse {
-        return CounterResponse(
-            counter = counterService.increment(id)
-        )
+    fun increment(@PathVariable("counter-id") id: String): Mono<CounterResponse> {
+        return counterService.increment(id)
+            .map {
+                CounterResponse(it)
+            }
     }
 
     @PostMapping(
         path = ["/{counter-id}/decrement"]
     )
-    fun decrement(@PathVariable("counter-id") id: String): CounterResponse {
-        return CounterResponse(
-            counter = counterService.decrement(id)
-        )
+    fun decrement(@PathVariable("counter-id") id: String): Mono<CounterResponse> {
+        return counterService.decrement(id)
+            .map {
+                CounterResponse(it)
+            }
+
     }
 
     @ExceptionHandler

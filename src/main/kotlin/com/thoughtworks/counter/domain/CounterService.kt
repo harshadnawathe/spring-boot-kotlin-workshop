@@ -1,7 +1,8 @@
 package com.thoughtworks.counter.domain
 
 import org.springframework.stereotype.Component
-import java.lang.IllegalArgumentException
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Component
 class CounterService(
@@ -10,30 +11,34 @@ class CounterService(
 
     fun createNew(name: String) = counterRepository.save(Counter(name))
 
-    fun find(id: String) : Counter {
+    fun find(id: String): Mono<Counter> {
         return counterRepository.findById(id)
-            .orElseThrow {
-                CounterNotFoundException(id)
+            .switchIfEmpty {
+                Mono.error(CounterNotFoundException(id))
             }
     }
 
-    fun increment(id: String): Counter {
+    fun increment(id: String): Mono<Counter> {
         return counterRepository.findById(id)
-            .map {
+            .doOnNext {
                 it.increment()
+            }
+            .flatMap {
                 counterRepository.save(it)
-            }.orElseThrow{
-                CounterNotFoundException(id)
+            }.switchIfEmpty {
+                Mono.error(CounterNotFoundException(id))
             }
     }
 
-    fun decrement(id: String): Counter {
+    fun decrement(id: String): Mono<Counter> {
         return counterRepository.findById(id)
-            .map {
+            .doOnNext {
                 it.decrement()
+            }
+            .flatMap {
                 counterRepository.save(it)
-            }.orElseThrow {
-                CounterNotFoundException(id)
+            }.switchIfEmpty {
+                Mono.error(CounterNotFoundException(id))
             }
     }
 }

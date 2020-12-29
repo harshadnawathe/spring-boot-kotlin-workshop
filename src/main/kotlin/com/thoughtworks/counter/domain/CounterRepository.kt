@@ -1,10 +1,11 @@
 package com.thoughtworks.counter.domain
 
-import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
 
 @Repository
-interface CounterRepository : MongoRepository<Counter, String> {
+interface CounterRepository : ReactiveMongoRepository<Counter, String> {
 
-    fun findAllByName(name: String) : List<Counter>
+    fun findAllByName(name: String): Flux<Counter>
 }

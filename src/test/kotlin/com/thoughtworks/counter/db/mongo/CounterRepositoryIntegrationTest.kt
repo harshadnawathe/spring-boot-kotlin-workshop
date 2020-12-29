@@ -21,11 +21,11 @@ class CounterRepositoryIntegrationTest {
                 increment()
             }.let { counter ->
                 repository.save(counter)
-            }
+            }.block()!!
 
-        val result = repository.findById(saved.id).get()
+        val result = repository.findById(saved.id).block()!!
 
-        assertThat(saved).isEqualTo(result)
+        assertThat(result).isEqualTo(saved)
     }
 
     @Test
@@ -36,9 +36,9 @@ class CounterRepositoryIntegrationTest {
                 increment()
             }.let { counter ->
                 repository.save(counter)
-            }
+            }.block()!!
 
-        val result = repository.findAllByName("someone-else's-counter")
+        val result: List<Counter> = repository.findAllByName("someone-else's-counter").collectList().block()!!
 
         assertThat(result)
             .hasSize(1)
