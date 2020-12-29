@@ -58,4 +58,13 @@ class CounterController(
             counter = counterService.increment(id)
         )
     }
+
+    @PostMapping(
+        path = ["/{counter-id}/decrement"]
+    )
+    fun decrement(@PathVariable("counter-id") id: String): CounterResponse {
+        return CounterResponse(
+            counter = counterService.decrement(id)
+        )
+    }
 }
