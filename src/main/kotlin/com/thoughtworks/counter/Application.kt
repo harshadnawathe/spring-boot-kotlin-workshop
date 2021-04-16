@@ -2,5 +2,7 @@ package com.thoughtworks.counter
 
 
 fun main() {
-    println("Hello, world!")
+    println("Enter your name")
+    val line = readLine()
+    println(line)
 }
